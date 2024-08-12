@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "abt"
+authors = [
+    {name = "Jacob de Nobel", email = "jacobdenobel@gmail.com"},
+]
+description = "AB Generic Python Toolbox (refractor)"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+dependencies = [
+    "numpy",
+    "scipy",
+    "nnresample",
+    "black"
+]
+dynamic = ["version"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
