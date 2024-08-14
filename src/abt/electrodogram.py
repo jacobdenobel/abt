@@ -67,18 +67,16 @@ def f120(
 
     elGram = np.zeros((nEl, nFrameOut))
     weights_matrix = np.zeros((nEl, nFrameOut))
-        
+
     for iCh in np.arange(nChan):
         phaseOffset = 2 * (channelOrder[iCh] - 1)
         elGram[idxLowEl[iCh], phaseOffset::phasesPerCyc] = ampIn[2 * iCh, :]
         elGram[idxHighEl[iCh], phaseOffset::phasesPerCyc] = ampIn[2 * iCh + 1, :]
-        
-        weights_matrix[idxLowEl[iCh], phaseOffset::phasesPerCyc] = (
-            weights[iCh, :]
-        )
-        weights_matrix[idxHighEl[iCh], phaseOffset::phasesPerCyc] = (
-            weights[iCh + nChan, :]
-        )
+
+        weights_matrix[idxLowEl[iCh], phaseOffset::phasesPerCyc] = weights[iCh, :]
+        weights_matrix[idxHighEl[iCh], phaseOffset::phasesPerCyc] = weights[
+            iCh + nChan, :
+        ]
 
     if cathodicFirst:
         kernel = np.array([-1, 1])

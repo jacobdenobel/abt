@@ -17,7 +17,7 @@ def f120(
     T=50 * np.ones(16),
     IDR=60 * np.ones(16),
     gain=0 * np.ones(16),
-    mapClip=2048 * np.ones(16),
+    mapClip=None,
     chanToEl=np.arange(16),
     carrierMode=1,
     **kwargs,
@@ -65,6 +65,8 @@ def f120(
     Copyright (c) 2015-2020 Advanced Bionics. All rights reserved.
     """
     nFtFrames = len(idxAudioFrame)
+    if mapClip is None:
+        mapClip = M * 4
 
     mSat = 30 * 10 * np.log(2) / np.log(10)
     mapA = (M - T) / IDR

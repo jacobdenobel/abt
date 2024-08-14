@@ -6,12 +6,21 @@ Created on Mon Nov  2 13:24:42 2020
 """
 
 import numpy as np
-from scipy.io.wavfile import read as wavread
 from scipy.signal import lfilter
+from scipy.io.wavfile import read as wavread
 from nnresample import resample
+import librosa
+
 
 # is multichannel audio surround sound?
-def read_wav(wav_file, fs=17400, i_channel=1, t_start_end=None, **kwargs):
+def read_wav(wav_file, fs=17400, i_channel=1, t_start_end=None,  stim_db = None, **kwargs):
+    y, sr = librosa.load(wav_file, sr=fs)
+    if stim_db is not None:
+        y = y / np.sqrt(np.mean(np.power(y, 2))) * 20e-6 * pow(10, stim_db / 20)
+    
+    y = y.reshape(1, -1)
+    return y, sr
+    
     if not isinstance(t_start_end, (list, tuple, np.ndarray)):
         t_start_end = list()
 
@@ -59,12 +68,13 @@ def read_wav(wav_file, fs=17400, i_channel=1, t_start_end=None, **kwargs):
 
     return source_signal, wav_file
 
+
 # this pre-emphasis filter has more values to optimize. Figure out difference
 def td_filter(
     x,
     coeff_numerator=np.array([0.7688, -1.5376, 0.7688]),
     coeff_denominator=np.array([1, -1.5299, 0.5453]),
-    **kwargs
+    **kwargs,
 ):
     if x.shape[0] > x.shape[1]:  #
         x = x.T

@@ -7,6 +7,7 @@ Created on Mon Nov  2 13:27:28 2020
 
 import numpy as np
 
+
 def buffer_(X, n, p=0, opt=None):
     """
     Buffer signal vector into matrix of data frames
@@ -65,6 +66,7 @@ def buffer_(X, n, p=0, opt=None):
             else:
                 b[:, i] = Xb[x1:x2]
     return b
+
 
 def window_buffer(signal_in, nFft=256, nHop=20, bufOpt=[], window=None, **kwargs):
     if window is None:

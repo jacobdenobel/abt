@@ -144,14 +144,13 @@ def current_steering_weights(
     assert np.all(
         np.diff(steeringRange, axis=0)
     ), "range[:,2] >= range[:,1] must be true for all channels"
-    
-    
+
     nFrames = loc.shape[1]
     weights = np.zeros((nChan * 2, nFrames))
 
     if current_steering == False:
         return 0.5 * np.ones((nChan * 2, nFrames))
-    
+
     for iCh in np.arange(nChan):
 
         weightHiRaw = loc[iCh, :] - iCh

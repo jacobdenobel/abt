@@ -105,14 +105,6 @@ def channel_energy(
     return engy
 
 
-
-
-
-
-
-
-
-
 def hilbert_envelope(
     X,
     nChan=15,

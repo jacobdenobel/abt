@@ -66,36 +66,38 @@ from collections import namedtuple
 
 from .defaults import DEFAULT_COEFFS
 
-agc = namedtuple("agc", ["smpGain", "State", "C", "CSlow", "CFast", "Hold", "Env", "G", "EnvFast"])
+agc = namedtuple(
+    "agc", ["smpGain", "State", "C", "CSlow", "CFast", "Hold", "Env", "G", "EnvFast"]
+)
 
 
-def dual_loop_td_agc( 
-    signal_in, # signal still in time domain (max. range [-1,1])
-    fs=17400, # audio sample rate
-    kneePt=4.476, # compression threshold (in log2 power)
-    compRatio=12, # compression ratio above kneepoint (in log-log space)
-    tauRelFast=-8 / (17400 * np.log(0.9901)) * 1000, # fast release [ms]
-    tauAttFast=-8 / (17400 * np.log(0.25)) * 1000, # fast attack [ms]
-    tauRelSlow=-8 / (17400 * np.log(0.9988)) * 1000, # slow release [ms]
-    tauAttSlow=-8 / (17400 * np.log(0.9967)) * 1000, # slow attack [ms]
-    maxHold=1305, # max. hold counter value 
-    g0=6.908, # gain for levels < kneepoint  (log2)
-    fastThreshRel=8, # relative threshold for fast loop [dB]
-    cSlowInit=0.5e-3, # initial value for slow averager, 0..1, [] for auto-scale to avg signal amp.
-    cFastInit=0.5e-3, # initial value for fast averager, 0..1, [] for auto-scale 
-    controlMode="naida", # how to use control signal, if provided on port #2? [string]; 
-                         #'naida'  - actual control signal is 0.75*max(abs(control, audio))
-                         #'direct' - control signal is used verbatim without further processing
-    clipMode="limit", # output clipping behavior: 'none' / 'limit' / 'overflow'
-    decFact=8, # decimation factor, turns the whole time domain signal into 8 blocks
-    envBufLen=32, # buffer length for envelope computation
-    gainBufLen=16, # buffer length for gain smoothing
-    envCoefs=None, # data window for envelope computation
-    ctrl=None, # (optional) additional "control" signal that is used to determine
-               # the gain to be applied to wavIn; wavIn itself is used as control
-               # is no other is explcitly provided     
-    **kwargs
-    ):
+def dual_loop_td_agc(
+    signal_in,  # signal still in time domain (max. range [-1,1])
+    fs=17400,  # audio sample rate
+    kneePt=4.476,  # compression threshold (in log2 power)
+    compRatio=12,  # compression ratio above kneepoint (in log-log space)
+    tauRelFast=-8 / (17400 * np.log(0.9901)) * 1000,  # fast release [ms]
+    tauAttFast=-8 / (17400 * np.log(0.25)) * 1000,  # fast attack [ms]
+    tauRelSlow=-8 / (17400 * np.log(0.9988)) * 1000,  # slow release [ms]
+    tauAttSlow=-8 / (17400 * np.log(0.9967)) * 1000,  # slow attack [ms]
+    maxHold=1305,  # max. hold counter value
+    g0=6.908,  # gain for levels < kneepoint  (log2)
+    fastThreshRel=8,  # relative threshold for fast loop [dB]
+    cSlowInit=0.5e-3,  # initial value for slow averager, 0..1, [] for auto-scale to avg signal amp.
+    cFastInit=0.5e-3,  # initial value for fast averager, 0..1, [] for auto-scale
+    controlMode="naida",  # how to use control signal, if provided on port #2? [string];
+    #'naida'  - actual control signal is 0.75*max(abs(control, audio))
+    #'direct' - control signal is used verbatim without further processing
+    clipMode="limit",  # output clipping behavior: 'none' / 'limit' / 'overflow'
+    decFact=8,  # decimation factor, turns the whole time domain signal into 8 blocks
+    envBufLen=32,  # buffer length for envelope computation
+    gainBufLen=16,  # buffer length for gain smoothing
+    envCoefs=None,  # data window for envelope computation
+    ctrl=None,  # (optional) additional "control" signal that is used to determine
+    # the gain to be applied to wavIn; wavIn itself is used as control
+    # is no other is explcitly provided
+    **kwargs,
+):
 
     # check input dimensions
     assert isinstance(signal_in, np.ndarray), "wavIn must be a numpy array!"
@@ -118,7 +120,7 @@ def dual_loop_td_agc(
 
     # general parameters
     c0_log2 = kneePt - 15
-    c0 = 2 ** c0_log2
+    c0 = 2**c0_log2
     gainSlope = 1 / compRatio - 1
     fastHdrm = 10 ** (-fastThreshRel / 20)
 
@@ -202,10 +204,10 @@ def dual_loop_td_agc(
         c_i = max((cFast_i, cSlow_i))
 
         # compute gain
-        c_i_log2 = np.log2(max((c_i, 10 ** -16)))
+        c_i_log2 = np.log2(max((c_i, 10**-16)))
         g_i = 2 ** (g0 + gainSlope * max((c_i_log2 - c0_log2, 0)))
 
-         # store variables
+        # store variables
         G[iFrame] = g_i
         Env[iFrame] = env_i
         C[iFrame] = c_i

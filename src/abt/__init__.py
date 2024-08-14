@@ -28,10 +28,10 @@ sounds = {
 
 
 def pulse_train_to_virtual(
-    pulse_train: np.ndarray, 
-    weights_matrix: np.ndarray, 
-    n_virtual: int = 8, 
-    charge_balanced: bool = False
+    pulse_train: np.ndarray,
+    weights_matrix: np.ndarray,
+    n_virtual: int = 8,
+    charge_balanced: bool = False,
 ):
     (num_electrodes, num_samples) = weights_matrix.shape
     n_virtual_channels = (num_electrodes - 1) * n_virtual + 1
@@ -63,7 +63,7 @@ def pulse_train_to_virtual(
             virtual_channel_id = int(weights_map[weights_pair] + el * n_virtual - 1)
             pulse_pair = pulse_train[el_pair, pt]
             pulse_train_virtual[virtual_channel_id, pt] = np.sum(pulse_pair)
-    
+
     if charge_balanced:
         return lfilter(np.array([1, -1]), 1, pulse_train_virtual)
     return pulse_train_virtual
@@ -76,13 +76,12 @@ def pulse_train_to_virtual(
 # frequency resolution = 68 Hz
 # Maximum channel stimulation rate (CSR) = 2899 Hz, but elsewhere in the article they say its 2320 Hz?
 def wav_to_electrodogram(
-    wav_file: str, 
-    apply_audiomixer=True, 
-    virtual_channels=True, 
+    wav_file: str,
+    apply_audiomixer=True,
+    virtual_channels=True,
     charge_balanced=True,
-    **kwargs
+    **kwargs,
 ):
-    # import audio signal
     audio_signal, *_ = frontend.read_wav(wav_file, **kwargs)
 
     if apply_audiomixer:
@@ -134,17 +133,16 @@ def wav_to_electrodogram(
     pulse_train, weights_matrix = electrodogram.f120(
         signal, weights=weights[:, audio_idx], **kwargs
     )
-    
 
     if virtual_channels:
         n_virtual_channels = 8 if kwargs.get("current_steering", True) else 1
         pulse_train = pulse_train_to_virtual(
             pulse_train, weights_matrix, n_virtual_channels, charge_balanced
         )
-        
+
     if not charge_balanced:
         pulse_train[pulse_train > 0] = 0
 
     pulse_train *= 1e-6
-    
+
     return pulse_train, audio_signal
