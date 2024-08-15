@@ -27,48 +27,6 @@ sounds = {
 }
 
 
-def pulse_train_to_virtual(
-    pulse_train: np.ndarray,
-    weights_matrix: np.ndarray,
-    n_virtual: int = 8,
-    charge_balanced: bool = False,
-):
-    (num_electrodes, num_samples) = weights_matrix.shape
-    n_virtual_channels = (num_electrodes - 1) * n_virtual + 1
-    pulse_times, pulse_electrodes = np.where(pulse_train.T < 0)
-    pulse_train_virtual = np.zeros((n_virtual_channels, num_samples))
-
-    weights_map = (
-        {(0.5, 0.5): 1}
-        if n_virtual == 1
-        else {
-            (float(x), 1 - float(x)): e
-            for e, x in enumerate(np.arange(0, 1.1, 1 / n_virtual)[::-1], 1)
-        }
-    )
-
-    for el in range(num_electrodes):
-        pulse_times_electrode = pulse_times[pulse_electrodes == el]
-
-        if el == 15:
-            el -= 1  # only loop over electrode, don't add to count
-            el_pair = [14, 15]
-        else:
-            el_pair = [el, el + 1]
-
-        for pt in pulse_times_electrode:
-            weights_pair = tuple(map(float, weights_matrix[el_pair, pt]))
-            if weights_pair not in weights_map:
-                continue
-            virtual_channel_id = int(weights_map[weights_pair] + el * n_virtual - 1)
-            pulse_pair = pulse_train[el_pair, pt]
-            pulse_train_virtual[virtual_channel_id, pt] = np.sum(pulse_pair)
-
-    if charge_balanced:
-        return lfilter(np.array([1, -1]), 1, pulse_train_virtual)
-    return pulse_train_virtual
-
-
 # perhaps we can get some data on which electrode array the patients have and such? Or too few people?
 # overview of system: https://www.youtube.com/watch?v=6Xq29_ci6Ko&t=596s
 # according to link: Fs = 17400 Hz
@@ -82,6 +40,26 @@ def wav_to_electrodogram(
     charge_balanced=True,
     **kwargs,
 ):
+    """
+    Parameters
+    ----------
+        wav_file: str
+            path to a .wav file to process
+        apply_audiomixer: bool = True
+            Whether to apply the audio mixer routine
+        virtual_channels: bool = True
+            Whether to output virtual channels, default AB is false
+        charge_balanced: bool = True
+            Whether to make the final pulse train charge balanced
+        **kwargs: dict
+            any keyword argument for any of the subroutines used in this function
+            
+    Returns
+    -------
+        np.ndarray, np.ndarray
+            pulse_train, audio_signal           
+    
+    """
     audio_signal, *_ = frontend.read_wav(wav_file, **kwargs)
 
     if apply_audiomixer:
@@ -130,19 +108,11 @@ def wav_to_electrodogram(
 
     signal = mapping.f120(carrier, signal, weights, audio_idx, **kwargs)
 
-    pulse_train, weights_matrix = electrodogram.f120(
-        signal, weights=weights[:, audio_idx], **kwargs
-    )
-
-    if virtual_channels:
-        n_virtual_channels = 8 if kwargs.get("current_steering", True) else 1
-        pulse_train = pulse_train_to_virtual(
-            pulse_train, weights_matrix, n_virtual_channels, charge_balanced
-        )
-
-    if not charge_balanced:
-        pulse_train[pulse_train > 0] = 0
-
-    pulse_train *= 1e-6
-
+    pulse_train = electrodogram.f120(
+        signal, 
+        weights=weights[:, audio_idx], 
+        virtual_channels=virtual_channels, 
+        charge_balanced=charge_balanced,
+        **kwargs
+    )  
     return pulse_train, audio_signal

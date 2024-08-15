@@ -78,7 +78,7 @@ def spec_peak_locator(
         loc[i, :] = binToLoc[maxBin[i, :]] + binCorrection * np.abs(
             binToLoc[maxBin[i, :]] - binToLoc[deltaLocIdx]
         )
-
+        
     return freqInterp, loc
 
 
@@ -149,7 +149,7 @@ def current_steering_weights(
     weights = np.zeros((nChan * 2, nFrames))
 
     if current_steering == False:
-        return 0.5 * np.ones((nChan * 2, nFrames))
+        nDiscreteSteps = 1
 
     for iCh in np.arange(nChan):
 
@@ -161,7 +161,9 @@ def current_steering_weights(
         elif nDiscreteSteps > 1:
             weightHiRaw = np.floor(weightHiRaw * (nDiscreteSteps - 1) + 0.5) / (
                 nDiscreteSteps - 1
-            )  # add +.5 and use floor to force round-half-away-from-zero (python round uses round-half-towards-even), only works for positive values
+            )  
+            # add +.5 and use floor to force round-half-away-from-zero (python round uses round-half-towards-even), 
+            # only works for positive values
         weightHi = steeringRange[0, iCh] + weightHiRaw * np.diff(steeringRange[:, iCh])
         weights[iCh, :] = 1 - weightHi
         weights[iCh + nChan, :] = weightHi
