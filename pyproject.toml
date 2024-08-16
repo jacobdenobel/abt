@@ -14,7 +14,7 @@ license = {file = "LICENSE"}
 dependencies = [
     "black",
     "librosa",
-    "matplotlib,
+    "matplotlib",
     "numpy",
     "scipy",
 ]
