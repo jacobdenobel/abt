@@ -42,6 +42,7 @@ def plot_heatmap(
     n_idx = np.nonzero(data.sum(axis=0))[0]
     if pad_idx:
         n_idx = np.unique(np.c_[n_idx - 1, n_idx, n_idx + 1].ravel())
+        n_idx = n_idx[n_idx < t.size]
 
     img = ax.pcolormesh(
         t[n_idx], y, data[:, n_idx], cmap="inferno", vmin=data.min(), vmax=data.max()
