@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import abt
-import abt.defaults
 
 TOTAL_INJECTED_CURRENT = 3.6952946437
 
