@@ -33,27 +33,30 @@ def plot_heatmap(
     t, y, data, 
     ax=None, fig=None, 
     show_bands: bool = True, 
-    pad_idx: bool = True,
+    pad_idx: bool = False,
     figsize=(9, 4)
 ):
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize)
 
-    n_idx = np.nonzero(data.sum(axis=0))[0]
     if pad_idx:
+        n_idx = np.nonzero(data.sum(axis=0))[0]
         n_idx = np.unique(np.c_[n_idx - 1, n_idx, n_idx + 1].ravel())
         n_idx = n_idx[n_idx < t.size]
-
-    img = ax.pcolormesh(
-        t[n_idx], y, data[:, n_idx], cmap="inferno", vmin=data.min(), vmax=data.max()
-    )
+        img = ax.pcolormesh(
+            t[n_idx], y, data[:, n_idx], cmap="inferno", vmin=data.min(), vmax=data.max()
+        )
+    else:
+        img = ax.pcolormesh(
+            t[:], y, data[:, :], cmap="inferno", vmin=data.min(), vmax=data.max()
+        )
     time_vs_freq(ax)
     ax.set_xlabel("time [s]")
     fig.colorbar(img, ax=ax)
     if show_bands:
         for f in y:
-            plt.plot([0, t[-1]], [f, f], color="white", alpha=0.3)
-        plt.xlim(0, t[-1])
+            ax.plot([0, t[-1]], [f, f], color="white", alpha=0.3)
+        ax.set_xlim(0, t[-1])
 
 
 def min_max_scale(data, a=-80, b=0):
