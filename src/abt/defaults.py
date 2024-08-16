@@ -1,7 +1,33 @@
 import numpy as np
 
+
+# these are incorrect see: utils.virtual_channel_frequencies for correct mapping
+ELECTRODE_FREQ_EDGES = [
+    340,
+    476,
+    612,
+    680,
+    816,
+    952,
+    1088,
+    1292,
+    1564,
+    1836,
+    2176,
+    2584,
+    3060,
+    3604,
+    4284,
+    8024,
+]
+ELECTRODE_FREQ_CENTERS = ELECTRODE_FREQ_EDGES[:-1] + (np.diff(ELECTRODE_FREQ_EDGES) / 2)
+
+
 DEFAULT_BINS = np.array([2, 2, 1, 2, 2, 2, 3, 4, 4, 5, 6, 7, 8, 10, 56])
 
+# 1 x nBin vector of nominal cochlear locations for the center frequencies of each STFT bin
+# values from 0 .. 15 in Q9 format
+# corresponding to the nominal steering location for each FFT bin
 DEFAULT_BIN_TO_LOC_MAP = (
     np.concatenate(
         (
@@ -16,7 +42,7 @@ DEFAULT_BIN_TO_LOC_MAP = (
                     1280,
                     1664,
                     1920,
-                    2176,  # 1 x nBin vector of nominal cochlear locations for the center frequencies of each STFT bin
+                    2176,  
                     2432,
                     2688,
                     2944,
@@ -26,7 +52,7 @@ DEFAULT_BIN_TO_LOC_MAP = (
                     3648,
                     3776,
                     3904,
-                    4032,  # values from 0 .. 15 in Q9 format
+                    4032,  
                     4160,
                     4288,
                     4416,
@@ -36,7 +62,7 @@ DEFAULT_BIN_TO_LOC_MAP = (
                     4864,
                     4966,
                     5069,
-                    5163,  # corresponding to the nominal steering location for each
+                    5163,  
                     5248,
                     5333,
                     5419,
@@ -46,7 +72,7 @@ DEFAULT_BIN_TO_LOC_MAP = (
                     5742,
                     5815,
                     5888,
-                    5961,  # FFT bin
+                    5961,  
                     6034,
                     6107,
                     6176,

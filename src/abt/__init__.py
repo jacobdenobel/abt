@@ -11,10 +11,10 @@ from . import noise_reduction
 from . import post_filterbank
 from . import mapping
 from . import electrodogram
-
 # from . import vocoder
 from . import audiomixer
 from . import audio_ramp
+from . import utils
 
 
 base_dir = os.path.realpath(os.path.dirname(__file__))
@@ -105,7 +105,6 @@ def wav_to_electrodogram(
 
     # Create carrier function with period of 1/peak_freq, maximum depends on implant's maximal stimulation rate
     carrier, audio_idx = post_filterbank.carrier_synthesis(peak_freq, **kwargs)
-
     signal = mapping.f120(carrier, signal, weights, audio_idx, **kwargs)
 
     pulse_train = electrodogram.f120(
@@ -115,4 +114,5 @@ def wav_to_electrodogram(
         charge_balanced=charge_balanced,
         **kwargs
     )  
+    
     return pulse_train, audio_signal

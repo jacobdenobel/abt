@@ -80,22 +80,26 @@ def f120(
         pt_v = np.zeros((n_virtual_channels, n_samples))
         v_weights = np.arange(0, 1.1, 1 / (n_virtual - 1))[::-1]
     
-    
     for iCh in np.arange(nChan):
         phaseOffset = 2 * (channelOrder[iCh] - 1)
-
-        pulse_train[idxLowEl[iCh], phaseOffset::phasesPerCyc] = ampIn[2 * iCh, :]
-        pulse_train[idxHighEl[iCh], phaseOffset::phasesPerCyc] = ampIn[2 * iCh + 1, :]
+        amp1 = ampIn[2 * iCh, :]
+        amp2 = ampIn[2 * iCh + 1, :]
+        
+        pulse_train[idxLowEl[iCh], phaseOffset::phasesPerCyc] = amp1
+        pulse_train[idxHighEl[iCh], phaseOffset::phasesPerCyc] = amp2
         
         if n_virtual == 1:
-            pt_v[iCh, phaseOffset::phasesPerCyc] = ampIn[2 * iCh, :] + ampIn[2 * iCh + 1, :]
+            pt_v[iCh, phaseOffset::phasesPerCyc] = amp1 + amp2
             continue
         
-        for vidx, w in enumerate(v_weights):
+        aw1 = weights[iCh, :] * (amp1 != 0)
+        aw2 = weights[iCh + nChan, : ] * (amp2 != 0)
+        
+        for vidx, w1 in enumerate(v_weights):
             v_channel = vidx + ((v_weights.size - 1) * iCh)
-            w2 = 1 - w
-            mask = np.logical_and(weights[iCh, :] == w,  weights[iCh + nChan, : ] == w2)
-            pt_v[v_channel, phaseOffset::phasesPerCyc][mask] = ampIn[2 * iCh, mask] + ampIn[2 * iCh + 1, mask]
+            w2 = 1 - w1
+            mask = np.logical_and(aw1 == w1, aw2 == w2)
+            pt_v[v_channel, phaseOffset::phasesPerCyc][mask] = amp1[mask] + amp2[mask]
 
 
     if virtual_channels:

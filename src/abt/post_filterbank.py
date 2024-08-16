@@ -54,7 +54,7 @@ def spec_peak_locator(
         argMaxPsd = np.argmax(PSD[currBinIdx, :], axis=0)
         maxBin[i, :] = currentBin + argMaxPsd
         currentBin += nBinLims[i]
-
+        
     for i in np.arange(nChan):
         midVal = np.log2(PSD[maxBin[i, :], np.arange(nFrames)])
         leftVal = np.log2(PSD[maxBin[i, :] - 1, np.arange(nFrames)])
@@ -71,7 +71,7 @@ def spec_peak_locator(
         binCorrection[:, ~midIsMax] = 0.5 * (
             rightVal[~midIsMax] == maxLeftRight[~midIsMax]
         ) - 0.5 * (leftVal[~midIsMax] == maxLeftRight[~midIsMax])
-
+        
         freqInterp[i, :] = fftBinWidth * (maxBin[i, :] + binCorrection)
         deltaLocIdx = maxBin[i, :] + np.sign(binCorrection).astype(int)
 
