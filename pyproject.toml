@@ -12,10 +12,11 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = {file = "LICENSE"}
 dependencies = [
+    "black",
+    "librosa",
+    "matplotlib,
     "numpy",
     "scipy",
-    "nnresample",
-    "black"
 ]
 dynamic = ["version"]
 

@@ -8,7 +8,6 @@ Created on Mon Nov  2 13:24:42 2020
 import numpy as np
 from scipy.signal import lfilter
 from scipy.io.wavfile import read as wavread
-from nnresample import resample
 import librosa
 
 
@@ -20,53 +19,6 @@ def read_wav(wav_file, fs=17400, i_channel=1, t_start_end=None,  stim_db = None,
     
     y = y.reshape(1, -1)
     return y, sr
-    
-    if not isinstance(t_start_end, (list, tuple, np.ndarray)):
-        t_start_end = list()
-
-    src_fs, source_signal = wavread(wav_file)
-    # rescale from integer words to float for audio processing
-
-    if source_signal.dtype == "uint8":
-        raise TypeError("8 bit PCM wav format not supported")
-    elif source_signal.dtype == "int16":
-        bits = 16
-        max_bit = 2.0 ** (bits - 1)
-    elif source_signal.dtype == "int32":
-        bits = 32
-        max_bit = 2.0 ** (bits - 1)
-    elif source_signal.dtype == "float32":  # dont rescale 32bit float data
-        max_bit = 0
-    elif source_signal.dtype == "float64":  # dont rescale 64 bit float either
-        max_bit = 0
-
-    source_signal = source_signal / (max_bit + 1)
-
-    if len(source_signal.shape) > 1:
-        source_signal = source_signal[:, i_channel - 1]
-    else:
-        source_signal = source_signal[np.newaxis, :]
-
-    if len(t_start_end) > 0:
-        source_signal = source_signal[:, t_start_end[0] : t_start_end[1]]
-
-    if src_fs != fs:  # This implementation is not numerically identical to matlab
-        if source_signal.shape[0] > 1:
-            resampled_signal = np.zeros(
-                (
-                    source_signal.shape[0],
-                    np.ceil(fs * source_signal.shape[1] / src_fs).astype(int),
-                )
-            )
-            for i in np.arange(source_signal.shape[0]):
-                resampled_signal[i, :] = resample(
-                    source_signal[i, :], fs, src_fs, axis=1
-                )
-            source_signal = resampled_signal
-        else:
-            source_signal = resample(source_signal, fs, src_fs, axis=1)
-
-    return source_signal, wav_file
 
 
 # this pre-emphasis filter has more values to optimize. Figure out difference
