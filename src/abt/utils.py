@@ -6,8 +6,8 @@ import matplotlib.ticker as mplticker
 from .defaults import DEFAULT_BIN_TO_LOC_MAP
 
 
-def virtual_channel_frequencies(n_channels: int):
-    fft_bin = np.fft.fftfreq(256, 1 / 17400)[:128]
+def virtual_channel_frequencies(n_channels: int, max_freq: int = None):
+    fft_bin = np.fft.fftfreq(256, 1 / 17400)[:128].clip(0, max_freq)
     return np.interp(np.linspace(0, 15, n_channels), DEFAULT_BIN_TO_LOC_MAP, fft_bin)
 
 
