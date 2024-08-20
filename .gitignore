@@ -162,5 +162,5 @@ cython_debug/
 #.idea/
 
 notebooks/output
-!*/data
-!*/venv
+data
+venv
