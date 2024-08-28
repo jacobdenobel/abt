@@ -20,15 +20,16 @@ def bin_over_y(data, src_y, tgt_y, agg = np.max):
     bins = np.digitize(src_y, tgt_y)
 
     for i in range(len(tgt_y)):
-        data_binned[i] = np.max(data[bins == i], axis=0)
+        if not any(bins == i): continue
+        data_binned[i] = agg(data[bins == i], axis=0)
     return data_binned
 
 
-def bin_over_y(data, n_bins):
-    data_binned = np.zeros((data.shape[0], n_bins))
+# def bin_over_y(data, n_bins):
+#     data_binned = np.zeros((data.shape[0], n_bins))
 
-    for i in range(data.shape[0]):
-        bins = np.digitize(src_y, tgt_y)
+#     for i in range(data.shape[0]):
+#         bins = np.digitize(src_y, tgt_y)
         
-        data_binned[i] = np.max(data[bins == i], axis=0)
-    return data_binned
+#         data_binned[i] = np.max(data[bins == i], axis=0)
+#     return data_binned

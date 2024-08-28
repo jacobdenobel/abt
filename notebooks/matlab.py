@@ -51,8 +51,10 @@ class MatlabData:
         
     @staticmethod
     def transform_to_virtual(i_det):
-        reshaped = i_det[:, :i_det.shape[1] - 1, :].reshape(-1, i_det.shape[2]).T
-        return np.flip(np.c_[reshaped, i_det[-1, -1, :]], axis=0)
+        reshaped = i_det[:, :i_det.shape[1], :].reshape(-1, i_det.shape[2]).T
+        return np.flip(reshaped, axis=0)
+        # reshaped = i_det[:, :i_det.shape[1] - 1, :].reshape(-1, i_det.shape[2]).T
+        # return np.flip(np.c_[reshaped, i_det[-1, -1, :]], axis=0)
     
     def spatial_factor(self, fiber_idx, i_det):
         return np.nanmin(i_det, axis=0) / i_det[fiber_idx, :]

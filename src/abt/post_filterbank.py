@@ -81,11 +81,9 @@ def spec_peak_locator(
         
     return freqInterp, loc
 
-
 def upsample(signal, n_cols, **kwargs):
     signal = np.repeat(signal, 3, axis=1)
     return np.concatenate((np.zeros((signal.shape[0], 2)), signal), axis=1)[:, :n_cols]
-
 
 def current_steering_weights(
     loc,
@@ -172,22 +170,6 @@ def current_steering_weights(
 
 
 def carrier_synthesis(
-    #     INPUT:
-    # %   par - parameter object/struct
-    # %   fPeak - nChan x nFrames matrix of estimated peak frequencies per channel
-    # %
-    # % FIELDS FOR par:
-    # %   parent.nChan - number of analysis channels
-    # %   parent.fs - sample rate of signalIn [Hz]
-    # %   stimRate - channel stimulation rate in pps or Hz, I think he meant that this is rateFT
-    # %   fModOn - peak frequency up to which max. modulation depth is applied [fraction of FT rate]
-    # %   fModOff - peak frequency beyond which no modulation is applied  [fraction of FT rate]
-    # %   maxModDepth - maximum modulation depth [0.0 .. 1.0]
-    # %   deltaPhaseMax - maximum phase rotation per FT frame [turns, 0.0 .. 1.0]
-    # %
-    # % OUTPUT:
-    # %   carrier  - nChan x nFrameFt square-wave carrier signals
-    # %   tFtFrame - start time of each FT frame, starting with 0 [s]
     fPeak,  # num_channels x num_frames matrix of estimated peak frequencies per channel
     nChan=15,  # number of analysis channels
     fs=17400,  # sampling rate of signal [Hz]
@@ -199,8 +181,26 @@ def carrier_synthesis(
     fModOff=1.0,
     **kwargs,
 ):
+    """INPUT:
+    
+       par - parameter object/struct
+       fPeak - nChan x nFrames matrix of estimated peak frequencies per channel
+    
+     FIELDS FOR par:
+       parent.nChan - number of analysis channels
+       parent.fs - sample rate of signalIn [Hz]
+       stimRate - channel stimulation rate in pps or Hz, I think he meant that this is rateFT
+       fModOn - peak frequency up to which max. modulation depth is applied [fraction of FT rate]
+       fModOff - peak frequency beyond which no modulation is applied  [fraction of FT rate]
+       maxModDepth - maximum modulation depth [0.0 .. 1.0]
+       deltaPhaseMax - maximum phase rotation per FT frame [turns, 0.0 .. 1.0]
+    
+     OUTPUT:
+       carrier  - nChan x nFrameFt square-wave carrier signals
+       tFtFrame - start time of each FT frame, starting with 0 [s]
+    """
+    
     nFrame = fPeak.shape[1]
-
     durFrame = nHop / fs  # duration of 1 audio frame [s]
     durStimCycle = (
         2 * pulseWidth * nChan * 1e-6

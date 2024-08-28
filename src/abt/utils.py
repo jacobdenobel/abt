@@ -2,6 +2,7 @@ import scipy
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mplticker
+from matplotlib.colors import LogNorm, Normalize
 
 from .defaults import DEFAULT_BIN_TO_LOC_MAP
 
@@ -34,25 +35,30 @@ def plot_heatmap(
     ax=None, fig=None, 
     show_bands: bool = True, 
     pad_idx: bool = False,
-    figsize=(9, 4)
+    figsize=(9, 4),
+    logcolors: bool = False
 ):
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize)
+        
+    norm = LogNorm(vmin=data.min(), vmax=data.max()) if logcolors else Normalize(vmin=data.min(), vmax=data.max())
 
     if pad_idx:
         n_idx = np.nonzero(data.sum(axis=0))[0]
         n_idx = np.unique(np.c_[n_idx - 1, n_idx, n_idx + 1].ravel())
         n_idx = n_idx[n_idx < t.size]
         img = ax.pcolormesh(
-            t[n_idx], y, data[:, n_idx], cmap="inferno", vmin=data.min(), vmax=data.max()
+            t[n_idx], y, data[:, n_idx], cmap="inferno", norm=norm
+            
         )
     else:
         img = ax.pcolormesh(
-            t[:], y, data[:, :], cmap="inferno", vmin=data.min(), vmax=data.max()
+            t[:], y, data[:, :], cmap="inferno", norm=norm
         )
     time_vs_freq(ax)
     ax.set_xlabel("time [s]")
     fig.colorbar(img, ax=ax)
+    
     if show_bands:
         for f in y:
             ax.plot([0, t[-1]], [f, f], color="white", alpha=0.3)
@@ -69,6 +75,24 @@ def make_bins(n, data):
     return data[:, : len(data[0]) // n * n].reshape(data.shape[0], -1, n).sum(axis=2)
 
 
+def smooth(
+    data: np.ndarray,
+    window_type: str = "hann",
+    window_size: int = 2048,
+    hop_length: int = None
+) -> np.ndarray:
+    
+    hop_length = hop_length or window_size // 4
+    window = scipy.signal.get_window(window_type, window_size)
+    wsum = window.sum()
+    data = np.vstack(
+        [
+            (np.convolve(data[i], window, mode="same") / wsum)[::hop_length]
+            for i in range(data.shape[0])
+        ]
+    )
+    return data
+
 def apply_filter(
     data: np.ndarray,
     window_type: str = "hann",
@@ -79,8 +103,6 @@ def apply_filter(
     n_bins: int = 0,
     resample_to: int = None,
 ):
-    hop_length = hop_length or window_size // 4
-
     data = data.copy()
     if clip_outliers != 0.0:
         q99 = np.quantile(data.ravel(), clip_outliers)
@@ -88,20 +110,14 @@ def apply_filter(
 
     if n_bins != 0:
         data = make_bins(n_bins, data)
-
-    window = scipy.signal.get_window(window_type, window_size)
-    wsum = window.sum()
-    data = np.vstack(
-        [
-            (np.convolve(data[i], window, mode="same") / wsum)[::hop_length]
-            for i in range(data.shape[0])
-        ]
-    )
-    if scale:
-        data = min_max_scale(data)
+        
+    data = smooth(data, window_type, window_size, hop_length)
 
     if resample_to:
         data = np.array([scipy.signal.resample(x, resample_to) for x in data])
+        
+    if scale:
+        data = min_max_scale(data)
 
     return data
 

@@ -38,6 +38,7 @@ def wav_to_electrodogram(
     apply_audiomixer=True,
     virtual_channels=True,
     charge_balanced=True,
+    n_rep: int = 1,
     **kwargs,
 ):
     """
@@ -61,6 +62,8 @@ def wav_to_electrodogram(
     
     """
     audio_signal, *_ = frontend.read_wav(wav_file, **kwargs)
+    
+    audio_signal = np.tile(audio_signal, n_rep)
 
     if apply_audiomixer:
         audio_signal, *_ = audiomixer.audiomixer(audio_signal, **kwargs)
@@ -105,6 +108,7 @@ def wav_to_electrodogram(
 
     # Create carrier function with period of 1/peak_freq, maximum depends on implant's maximal stimulation rate
     carrier, audio_idx = post_filterbank.carrier_synthesis(peak_freq, **kwargs)
+    
     signal = mapping.f120(carrier, signal, weights, audio_idx, **kwargs)
 
     pulse_train = electrodogram.f120(
