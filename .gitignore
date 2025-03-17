@@ -164,3 +164,12 @@ cython_debug/
 notebooks/output
 data
 venv
+fade_projects
+
+din2
+*.pdf
+*.ssh*
+output_folder
+notebooks/output2
+notebooks/output.zip
+*.wav

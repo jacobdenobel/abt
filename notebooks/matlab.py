@@ -32,8 +32,8 @@ class MatlabData:
         I_det = np.nan_to_num(I_det, nan=np.nanmax(I_det, axis=0))
         
         if not compute_tm:
-            M = mat['Df120']['M'][m]
-            T = mat['Df120']['T'][m]
+            M = mat['Df120']['M'][m] * 1e-3
+            T = mat['Df120']['T'][m] * 1e-3
         else:
             T, M = matlab_TM_thresholds(
                 np.load(IDET_NO_CS),
